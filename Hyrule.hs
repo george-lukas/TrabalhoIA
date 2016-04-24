@@ -24,14 +24,13 @@ data Place = Dungeon1 (Int,Int) | Dungeon2 (Int, Int) | Dungeon3 (Int, Int)
 -- Data position descrites the folowing position of Link
 type Position = (Int, Int)
 
--- Here is the weight to the heuristics
+-- Here is the weight to the heuristics. A function that returns a weight
 weight :: Terrain -> Int
 weight Grass = 10
 weight Sand = 20
 weight Forest = 100
 weight Mountain = 150
 weight Water = 180
-
 
 --- Controling Link movements
 
