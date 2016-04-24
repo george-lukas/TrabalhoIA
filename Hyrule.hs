@@ -10,10 +10,10 @@ import Data.List
 -- Defining some dataTypes
 
 -- Valids Terrains in Hyrule
-data Terrain = Grass  | Sand | Forest | Mountain | Water
+data Terrain = Grass | Sand | Forest | Mountain | Water | WDungeon | NWDungeon
 
 -- Valid Objtects in Hyrule Kingdom
-data Object = Gate Place | Pedant | Sword | Empty
+data Object = Pendant | MasterSword | Gate | Empty
 
 -- Valid nodes where Link can walk
 data Tile = Tile Terrain Object
@@ -37,8 +37,8 @@ weight Water = 180
 
 -- Utility for nextStepGen
 tMap :: Array (Int, Int) Tile
-tMap = listArray ((0, 0), (2,2)) ['x', 'x', 'x', 'x', 't', 'x', 'x', 'x', 'x']
-
+tMap = listArray ((0,0), (41,41)) [Tile Grass Empty, Tile Grass Empty, Tile Water Empty...
+                                   
 -- Utility for nextStepGen
 uBound :: Ix i => Array (i,i) e -> (i,i)
 uBound = snd . bounds
