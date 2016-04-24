@@ -13,7 +13,7 @@ import Data.List
 data Terrain = Grass | Sand | Forest | Mountain | Water | WDungeon | NWDungeon
 
 -- Valid Objtects in Hyrule Kingdom
-data Object = Pendant | MasterSword | Gate | Empty
+data Object = Pendant | MasterSword | Gate Place | Empty
 
 -- Valid nodes where Link can walk
 data Tile = Tile Terrain Object
@@ -22,7 +22,7 @@ data Tile = Tile Terrain Object
 data Place = Dungeon1 (Int,Int) | Dungeon2 (Int, Int) | Dungeon3 (Int, Int)
 
 -- Data position descrites the folowing position of Link
-data Position =  (Int, Int)
+type Position = (Int, Int)
 
 -- Here is the weight to the heuristics
 weight :: Terrain -> Int
@@ -37,13 +37,12 @@ weight Water = 180
 
 -- Utility for nextStepGen
 tMap :: Array (Int, Int) Tile
-tMap = listArray ((0,0), (41,41)) [Tile Grass Empty, Tile Grass Empty, Tile Water Empty...
+tMap = listArray ((0,0), (41,41)) [Tile Grass Empty, Tile Grass Empty, Tile Water Empty]
                                    
 -- Utility for nextStepGen
 uBound :: Ix i => Array (i,i) e -> (i,i)
 uBound = snd . bounds
 
--- Controls the valids moviments in Matrix
 nextStepGen :: (Int,Int) -> [((Int,Int), Int)]
 nextStepGen (a,b) = map (\x -> (x, 1)) $ nub [
   if a > 0 then (a - 1, b) else (a, b) , -- walk to the left
