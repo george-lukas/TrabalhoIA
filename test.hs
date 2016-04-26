@@ -5,7 +5,7 @@ import Data.List (nub)
 import AStar
 
 tMap :: Array (Int, Int) Char
---tMap = listArray ((0, 0), (2,2)) ['x', 'x', 'x', 'x', 't', 'x', 'x', 'x', 'x']
+tMap = listArray ((0, 0), (2,2)) ['x', 'x', 'x', 'x', 't', 'x', 'x', 'x', 'x']
 
 uBound :: Ix i => Array (i,i) e -> (i,i)
 uBound = snd . bounds
