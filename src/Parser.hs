@@ -1,3 +1,5 @@
+-- | Module Parser transforms text files in a Tiles array (strongly typed).
+
 module Parser where
 
 import Hyrule

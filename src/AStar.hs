@@ -1,4 +1,4 @@
--- |
+-- | A* search: Finds the shortest path from a start node to a goal node using a heuristic function.
 
 module AStar where
 

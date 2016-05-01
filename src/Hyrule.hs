@@ -1,3 +1,5 @@
+-- | Module Hyrule describes the whole Kingdom of Hyrule as DataTypes and Type aliases
+
 module Hyrule where
 
 import Data.Array
