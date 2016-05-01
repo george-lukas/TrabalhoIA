@@ -1,0 +1,96 @@
+-- | Module Main embodies all modules, also have some helper functions to A*.
+
+module Main where
+
+import AStar
+import Hyrule
+-- import Gui
+import Parser
+import Data.Array
+import Data.Foldable (find)
+import Data.List (nub)
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromJust)
+
+findObject :: Object -> Area -> Maybe Position
+findObject obj area = fst <$> find (\(_, t) -> object t == obj) (assocs area)
+
+findOverworldStartPosition :: Area -> Position
+findOverworldStartPosition overworld  = fromJust . findObject Home $ overworld
+
+findDungeonStartPosition :: Area -> Position
+findDungeonStartPosition dungeon = fromJust . findObject (Gate $ Overworld) $ dungeon
+
+overworldSize = 42
+dungeonSize = 28
+
+weight :: Terrain -> Weight
+weight terr = Map.findWithDefault 10 terr $ Map.fromList [(Grass, 10),
+                                                          (Sand, 20),
+                                                          (Forest, 100),
+                                                          (Mountain, 150),
+                                                          (Water, 180),
+                                                          (WDungeon, 10)]
+
+walkable :: Area -> Position -> Bool
+walkable area pos = terrain (area ! pos) /= NWDungeon
+
+nextStepGen :: Area ->  Position -> [(Position, Weight)]
+nextStepGen area pos@(a,b) = let w = weight . terrain $ area ! pos
+                             in map (\x -> (x, w)) $ nub [
+  if a > 0 && walkable area (a - 1, b) then (a - 1, b) else (a, b) , -- walk to the left
+  if a < (fst . snd . bounds $ area) && walkable area (a + 1, b) then (a + 1, b) else (a, b) , -- walk to the right
+  if b > 0  && walkable area (a, b - 1) then (a, b - 1) else (a, b) , -- walk down
+  if b < (snd . snd . bounds $ area) && walkable area (a, b + 1) then (a , b + 1) else (a, b)] -- walk up
+
+reachedGoal :: Object -> Area  -> Position -> Bool
+reachedGoal obj area  pos = object (area ! pos) == obj
+
+reachedSword = reachedGoal MasterSword
+reachedPendant = reachedGoal Pendant
+reachedGate = reachedGoal . Gate . Dungeon
+
+heuristic :: Area -> Position -> Weight
+heuristic area pos =  weight . terrain $ (area ! pos)
+
+-- map position from (y,x), zero-index to (x,y), one-idex
+rearrangePosition :: Position -> Position
+rearrangePosition (a,b) = (b + 1,a + 1)
+
+
+main :: IO ()
+main = do
+  contentOverworld <- readFile "../maps/overworld.map"
+  contentDungeon1  <- readFile "../maps/dungeon1.map"
+  contentDungeon2  <- readFile "../maps/dungeon1.map"
+  contentDungeon3  <- readFile "../maps/dungeon1.map"
+
+  let overworldMap = parseMap overworldSize contentOverworld
+      dungeon1Map  = parseMap dungeonSize contentDungeon1
+      dungeon2Map  = parseMap dungeonSize contentDungeon2
+      dungeon3Map  = parseMap dungeonSize contentDungeon3
+      overworldSP = findOverworldStartPosition overworldMap
+      firstDungeonSP = findDungeonStartPosition dungeon1Map
+      secondDungeonSP = findDungeonStartPosition dungeon2Map
+      thirdDungeonSP = findDungeonStartPosition dungeon3Map
+
+      --firstDungeonPosition = fromJust . findObject $ (Gate (Dungeon 1)) overworldMap
+      --secondDungeonPosition = fromJust . findObject $ (Gate (Dungeon 2)) overworldMap
+      --thirdDungeonPosition = fromJust . findObject $ (Gate (Dungeon 3)) overworldMap
+
+      totalCostAndPath = do
+        (costFD, pathToFirstDungeon)  <- astarSearch overworldSP (reachedGate 1 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
+        (costFP, pathToFirstPendant)  <- astarSearch firstDungeonSP (reachedPendant dungeon1Map) (nextStepGen dungeon1Map) $ heuristic dungeon1Map
+        (costFP', pathBackFromFirstPendant) <- return (costFP, reverse pathToFirstPendant)
+        (costSD, pathToSecondDungeon) <- astarSearch (last pathToFirstDungeon) (reachedGate 2 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
+        (costSP, pathToSecondPendant) <- astarSearch secondDungeonSP (reachedPendant dungeon2Map) (nextStepGen dungeon2Map) $ heuristic dungeon2Map
+        (costTD, pathToThirdDungeon)  <- astarSearch (last pathToSecondDungeon) (reachedGate 3 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
+        (costTP, pathToThirdPendant)  <- astarSearch thirdDungeonSP (reachedPendant dungeon3Map) (nextStepGen dungeon3Map) $ heuristic dungeon3Map
+        (costMS, pathToMasterSword)   <- astarSearch (last pathToThirdDungeon) (reachedSword overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
+        let totalCost'  = costFD + 2 * costFP + costSD + 2 * costSP + costTD + 2 * costTP + costMS
+            totalPath' = map (map rearrangePosition) $ [pathToFirstDungeon] ++ [pathToFirstPendant] ++ [(reverse pathToFirstPendant)] ++ [pathToSecondDungeon] ++
+              [pathToSecondPendant] ++ [(reverse pathToSecondPendant)] ++ [pathToThirdDungeon] ++  [pathToThirdPendant] ++
+              [(reverse pathToThirdPendant)] ++ [pathToMasterSword]
+        return (totalCost', totalPath')
+
+  print $ totalCostAndPath
