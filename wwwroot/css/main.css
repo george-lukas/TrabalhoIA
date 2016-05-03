@@ -1,0 +1,29 @@
+table {
+    /* width: 100%; */
+    /* height: 100%; */
+}
+
+td {
+    width: 20px;
+    height: 20px;
+}
+
+.grass {
+    background-color: lightgreen;
+}
+
+.sand {
+    background-color: yellow;
+}
+
+.forest {
+    background-color: darkgreen;
+}
+
+.mountain {
+    background-color: brown;
+}
+
+.water {
+    background-color: blue;
+}
