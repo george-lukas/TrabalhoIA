@@ -81,16 +81,19 @@ main = do
       totalCostAndPath = do
         (costFD, pathToFirstDungeon)  <- astarSearch overworldSP (reachedGate 1 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
         (costFP, pathToFirstPendant)  <- astarSearch firstDungeonSP (reachedPendant dungeon1Map) (nextStepGen dungeon1Map) $ heuristic dungeon1Map
-        (costFP', pathBackFromFirstPendant) <- return (costFP, reverse pathToFirstPendant)
         (costSD, pathToSecondDungeon) <- astarSearch (last pathToFirstDungeon) (reachedGate 2 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
         (costSP, pathToSecondPendant) <- astarSearch secondDungeonSP (reachedPendant dungeon2Map) (nextStepGen dungeon2Map) $ heuristic dungeon2Map
         (costTD, pathToThirdDungeon)  <- astarSearch (last pathToSecondDungeon) (reachedGate 3 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
         (costTP, pathToThirdPendant)  <- astarSearch thirdDungeonSP (reachedPendant dungeon3Map) (nextStepGen dungeon3Map) $ heuristic dungeon3Map
         (costMS, pathToMasterSword)   <- astarSearch (last pathToThirdDungeon) (reachedSword overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
         let totalCost'  = costFD + 2 * costFP + costSD + 2 * costSP + costTD + 2 * costTP + costMS
-            totalPath' = map (map rearrangePosition) $ [pathToFirstDungeon] ++ [pathToFirstPendant] ++ [(reverse pathToFirstPendant)] ++ [pathToSecondDungeon] ++
-              [pathToSecondPendant] ++ [(reverse pathToSecondPendant)] ++ [pathToThirdDungeon] ++  [pathToThirdPendant] ++
-              [(reverse pathToThirdPendant)] ++ [pathToMasterSword]
+            totalPath' = [Path Overworld pathToFirstDungeon,
+                          Path (Dungeon 1) $ pathToFirstPendant ++ (tail . reverse $ pathToFirstPendant),
+                          Path Overworld pathToSecondDungeon,
+                          Path (Dungeon 2) $ pathToSecondPendant ++ (tail . reverse $ pathToSecondPendant),
+                          Path Overworld pathToThirdDungeon,
+                          Path (Dungeon 3) $ pathToThirdPendant ++ (tail .reverse $ pathToThirdPendant),
+                          Path Overworld pathToMasterSword]
         return (totalCost', totalPath')
 
   print $ totalCostAndPath

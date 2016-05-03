@@ -14,7 +14,7 @@ data Object = Pendant | MasterSword | Gate Place | DummyGate | Home | Empty deri
 
 data Place = Dungeon Int | Overworld deriving (Eq, Show)
 
-data Path = Path Place [Tile]
+data Path = Path Place [Position] deriving Show
 
 -- Model
 
