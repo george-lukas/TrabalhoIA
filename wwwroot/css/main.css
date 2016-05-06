@@ -40,3 +40,11 @@ td img {
     width: 15px;
     height: 15px;
 }
+
+.show {
+    display: inline;
+}
+
+.hide {
+    display: none;
+}

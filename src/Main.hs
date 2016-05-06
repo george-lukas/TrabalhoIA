@@ -93,4 +93,4 @@ main = do
                           Path Overworld pathToMasterSword]
         return (totalCost', totalPath')
 
-  boot dungeon3Map
+  boot [overworldMap, dungeon1Map, dungeon2Map, dungeon3Map]

@@ -50,37 +50,61 @@ saveMap (Dungeon n) m | n >= 1 && n <= 3 = writeFile ("../maps/dungeon" ++ show 
                       | otherwise        = error "Mapa desconhecido"
 
 
-setup :: Area ->  Window -> UI ()
-setup area window = void $ do
+setup :: [Area] ->  Window -> UI ()
+setup areaList window = void $ do
 
-  let aSize = if areaType area == Overworld then 42 else 28
+  let (overworld:dungeon1:dungeon2:dungeon3:[]) = areaList
 
   -- Setup windows data
   return window # set UI.title "Area Editor"
   UI.addStyleSheet window "main.css"
 
   -- map modeled as a table
-  table <- UI.table
-  tdList <- mapM ( mapM (\tile -> let cn = tileToClass tile in  UI.td #. cn # set UI.value cn ) ) (chunksOf aSize . toList . areaModel $ area)
+  owTable <- createTable overworld #. "show"
+  d1Table <- createTable dungeon1 #. "hide"
+  d2Table <- createTable dungeon2 #. "hide"
+  d3Table <- createTable dungeon3 #. "hide"
 
-  trList <- mapM (\tds -> UI.tr #+ tds) $ map (map element) tdList
-  element table #+ map element trList
+  let tables = [owTable, d1Table, d2Table, d3Table]
 
   -- 
-  saveButton <- UI.button # set UI.text "Save Map"
-  getBody window #+ [element table, element saveButton]
+  overworldButton <- UI.button # set UI.text "Edit Overworld"
+  dungeon1Button <- UI.button # set UI.text "Edit Dungeon 1"
+  dungeon2Button <- UI.button # set UI.text "Edit Dungeon 2"
+  dungeon3Button <- UI.button # set UI.text "Edit Dungeon 3"
+  getBody window #+ [grid
+                     [[row [element overworldButton, element dungeon1Button, element dungeon2Button, element dungeon3Button]],
+                      [row [element owTable, element d1Table, element d2Table, element d3Table]]]]
 
-  mapM_ (mapM_ (\td -> on UI.click td $ const $ do
+  let buttons = [overworldButton, dungeon1Button, dungeon2Button, dungeon3Button]
+
+  mapM_ (\t -> on UI.click (fst t) $ const $ do
+            mapM_ (#. "hide") $ map element tables
+            element (snd t) #. "show") $ zip buttons tables
+
+    where
+      createTable area = do
+        let aSize = if areaType area == Overworld then 42 else 28
+
+        table <- UI.table
+        tdList <- mapM ( mapM (\tile -> let cn = tileToClass tile in  UI.td #. cn # set UI.value cn ) ) (chunksOf aSize . toList . areaModel $ area)
+        trList <- mapM (\tds -> UI.tr #+ tds) $ map (map element) tdList
+        saveButton <- UI.button # set UI.text "Save Alterations"
+
+        mapM_ (mapM_ (\td -> on UI.click td $ const $ do
                    (terrain', object') <- classToTileData <$> get UI.value td
                    let cn = (nextTerrain (areaType area) terrain') ++ " " ++ object'
                    element td # set UI.value cn #. cn)) tdList
 
-  on UI.click saveButton $ const $ do
-    lst <- mapM (mapM (\c -> do
-                          (t', o') <- classToTileData <$> get UI.value c
-                          return $ t' ++ o')) tdList
-    liftIO $ saveMap (areaType area) (concat . concat . map (++ ["\n"]) $ lst)
-    return ()
+        on UI.click saveButton $ const $ do
+          lst <- mapM (mapM (\c -> do
+                                (t', o') <- classToTileData <$> get UI.value c
+                                return $ t' ++ o')) tdList
+          liftIO $ saveMap (areaType area) (concat . concat . map (++ ["\n"]) $ lst)
+          return ()
 
-boot :: Area -> IO ()
+        element table #+ map element trList
+        column [element table, element saveButton]
+
+boot :: [Area] -> IO ()
 boot = startGUI defaultConfig {jsPort = Just 8088, jsStatic = Just "../wwwroot"} . setup
