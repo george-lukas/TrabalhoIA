@@ -8,22 +8,27 @@ td {
     height: 20px;
 }
 
-.grass {
+.g {
     background-color: lightgreen;
 }
 
-.sand {
+.s {
     background-color: yellow;
 }
 
-.forest {
+.f {
     background-color: darkgreen;
 }
 
-.mountain {
+.m {
     background-color: brown;
 }
 
-.water {
+.w {
     background-color: blue;
+}
+
+td img {
+    width: 15px;
+    height: 15px;
 }

@@ -8,13 +8,13 @@ import Data.Array
 
 data Tile = Tile { terrain :: Terrain, object :: Object} deriving (Show)
 
-data Terrain = Grass | Sand | Forest | Mountain | Water | WDungeon | NWDungeon deriving (Eq, Ord, Show)
+data Terrain = Grass | Sand | Forest | Mountain | Water | WDungeon | NWDungeon deriving (Eq, Ord, Show, Read)
 
-data Object = Pendant | MasterSword | Gate Place | DummyGate | Home | Empty deriving (Eq, Show)
+data Object = Pendant | MasterSword | Gate AreaType | DummyGate | Home | Empty deriving (Eq, Show, Read)
 
-data Place = Dungeon Int | Overworld deriving (Eq, Show)
+data AreaType = Dungeon Int | Overworld deriving (Eq, Show, Read)
 
-data Path = Path Place [Position] deriving Show
+data Path = Path AreaType [Position] deriving Show
 
 -- Model
 
@@ -22,6 +22,6 @@ type Weight = Int
 
 type Position = (Int, Int)
 
-type Area = Array Position Tile
+data Area = Area { areaType :: AreaType, areaModel :: Array Position Tile }
 
 type AreaSize = Int

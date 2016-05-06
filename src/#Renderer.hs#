@@ -26,7 +26,7 @@ setup :: Area ->  Window -> UI ()
 setup area window = void $ do
 
   let model = areaModel area
-      areaType = areaType area
+      aType = areaType area
 
   -- Setup windows data
   return window # set UI.title "Area Editor"

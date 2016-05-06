@@ -13,7 +13,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)
 
 findObject :: Object -> Area -> Maybe Position
-findObject obj area = fst <$> find (\(_, t) -> object t == obj) (assocs area)
+findObject obj area = fst <$> find (\(_, t) -> object t == obj) (assocs (areaModel area))
 
 findOverworldStartPosition :: Area -> Position
 findOverworldStartPosition overworld  = fromJust . findObject Home $ overworld
@@ -33,25 +33,26 @@ weight terr = Map.findWithDefault 10 terr $ Map.fromList [(Grass, 10),
                                                           (WDungeon, 10)]
 
 walkable :: Area -> Position -> Bool
-walkable area pos = terrain (area ! pos) /= NWDungeon
+walkable area pos = terrain ((areaModel area) ! pos) /= NWDungeon
 
 nextStepGen :: Area ->  Position -> [(Position, Weight)]
-nextStepGen area pos@(a,b) = let w = weight . terrain $ area ! pos
+nextStepGen area pos@(a,b) = let area' = areaModel area
+                                 w = weight . terrain $ area' ! pos
                              in map (\x -> (x, w)) $ nub [
   if a > 0 && walkable area (a - 1, b) then (a - 1, b) else (a, b) , -- walk to the left
-  if a < (fst . snd . bounds $ area) && walkable area (a + 1, b) then (a + 1, b) else (a, b) , -- walk to the right
+  if a < (fst . snd . bounds $ (areaModel area)) && walkable area (a + 1, b) then (a + 1, b) else (a, b) , -- walk to the right
   if b > 0  && walkable area (a, b - 1) then (a, b - 1) else (a, b) , -- walk down
-  if b < (snd . snd . bounds $ area) && walkable area (a, b + 1) then (a , b + 1) else (a, b)] -- walk up
+  if b < (snd . snd . bounds $ (areaModel area)) && walkable area (a, b + 1) then (a , b + 1) else (a, b)] -- walk up
 
 reachedGoal :: Object -> Area  -> Position -> Bool
-reachedGoal obj area  pos = object (area ! pos) == obj
+reachedGoal obj area  pos = object ((areaModel area) ! pos) == obj
 
 reachedSword = reachedGoal MasterSword
 reachedPendant = reachedGoal Pendant
 reachedGate = reachedGoal . Gate . Dungeon
 
 heuristic :: Area -> Position -> Weight
-heuristic area pos =  weight . terrain $ (area ! pos)
+heuristic area pos =  weight . terrain $ ((areaModel area) ! pos)
 
 -- map position from (y,x), zero-index to (x,y), one-idex
 rearrangePosition :: Position -> Position
@@ -62,21 +63,17 @@ main :: IO ()
 main = do
   contentOverworld <- readFile "../maps/overworld.map"
   contentDungeon1  <- readFile "../maps/dungeon1.map"
-  contentDungeon2  <- readFile "../maps/dungeon1.map"
-  contentDungeon3  <- readFile "../maps/dungeon1.map"
+  contentDungeon2  <- readFile "../maps/dungeon2.map"
+  contentDungeon3  <- readFile "../maps/dungeon3.map"
 
-  let overworldMap = parseMap overworldSize contentOverworld
-      dungeon1Map  = parseMap dungeonSize contentDungeon1
-      dungeon2Map  = parseMap dungeonSize contentDungeon2
-      dungeon3Map  = parseMap dungeonSize contentDungeon3
+  let overworldMap = parseMap Overworld overworldSize contentOverworld
+      dungeon1Map  = parseMap (Dungeon 1) dungeonSize contentDungeon1
+      dungeon2Map  = parseMap (Dungeon 2) dungeonSize contentDungeon2
+      dungeon3Map  = parseMap (Dungeon 3) dungeonSize contentDungeon3
       overworldSP = findOverworldStartPosition overworldMap
       firstDungeonSP = findDungeonStartPosition dungeon1Map
       secondDungeonSP = findDungeonStartPosition dungeon2Map
       thirdDungeonSP = findDungeonStartPosition dungeon3Map
-
-      --firstDungeonPosition = fromJust . findObject $ (Gate (Dungeon 1)) overworldMap
-      --secondDungeonPosition = fromJust . findObject $ (Gate (Dungeon 2)) overworldMap
-      --thirdDungeonPosition = fromJust . findObject $ (Gate (Dungeon 3)) overworldMap
 
       totalCostAndPath = do
         (costFD, pathToFirstDungeon)  <- astarSearch overworldSP (reachedGate 1 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
