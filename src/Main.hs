@@ -4,7 +4,7 @@ module Main where
 
 import AStar
 import Hyrule
--- import Gui
+import Renderer
 import Parser
 import Data.Array
 import Data.Foldable (find)
@@ -93,4 +93,4 @@ main = do
                           Path Overworld pathToMasterSword]
         return (totalCost', totalPath')
 
-  print $ totalCostAndPath
+  boot dungeon3Map
