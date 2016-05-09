@@ -83,7 +83,7 @@ main = do
         (costTD, pathToThirdDungeon)  <- astarSearch (last pathToSecondDungeon) (reachedGate 3 overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
         (costTP, pathToThirdPendant)  <- astarSearch thirdDungeonSP (reachedPendant dungeon3Map) (nextStepGen dungeon3Map) $ heuristic dungeon3Map
         (costMS, pathToMasterSword)   <- astarSearch (last pathToThirdDungeon) (reachedSword overworldMap) (nextStepGen overworldMap) $ heuristic overworldMap
-        let totalCost'  = costFD + 2 * costFP + costSD + 2 * costSP + costTD + 2 * costTP + costMS
+        let totalCost'  = [costFD, 2 * costFP, costSD,  2 * costSP, costTD,  2 * costTP, costMS]
             totalPath' = [Path Overworld pathToFirstDungeon,
                           Path (Dungeon 1) $ pathToFirstPendant ++ (tail . reverse $ pathToFirstPendant),
                           Path Overworld pathToSecondDungeon,
@@ -93,4 +93,19 @@ main = do
                           Path Overworld pathToMasterSword]
         return (totalCost', totalPath')
 
-  boot [overworldMap, dungeon1Map, dungeon2Map, dungeon3Map]
+  --boot [overworldMap, dungeon1Map, dungeon2Map, dungeon3Map]
+  let (totalCost', totalPath') = fromJust $ totalCostAndPath
+  putStrLn $ "Custo para chegar à primeira dungeon: " ++ (show $ totalCost' !! 0)
+  putStrLn $ "Caminho à primeira dungeon:" ++ (show $ totalPath' !! 0)
+  putStrLn $ "Custo para chegar ao primeiro pingente: " ++ (show $ totalCost' !! 1)
+  putStrLn $ "Caminho ao primeiro pingente:" ++ (show $ totalPath' !! 1)
+  putStrLn $ "Custo para chegar à segunda dungeon: " ++ (show $ totalCost' !! 2)
+  putStrLn $ "Caminho à segunda dungeon:" ++ (show $ totalPath' !! 2)
+  putStrLn $ "Custo para chegar ao segundo pingente: " ++ (show $ totalCost' !! 3)
+  putStrLn $ "Caminho ao segundo pingente:" ++ (show $ totalPath' !! 3)
+  putStrLn $ "Custo para chegar à terceira dungeon: " ++ (show $ totalCost' !! 4)
+  putStrLn $ "Caminho à terceira dungeon:" ++ (show $ totalPath' !! 4)
+  putStrLn $ "Custo para chegar ao terceiro pingente: " ++ (show $ totalCost' !! 5)
+  putStrLn $ "Caminho ao terceiro pingente:" ++ (show $ totalPath' !! 5)
+  putStrLn $ "Custo para chegar à MasterSword" ++ (show $ totalCost' !! 6)
+  putStrLn $ "Caminho à MasterSword :" ++ (show $ totalPath' !! 6)
