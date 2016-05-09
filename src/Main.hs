@@ -91,21 +91,38 @@ main = do
                           Path Overworld pathToThirdDungeon,
                           Path (Dungeon 3) $ pathToThirdPendant ++ (tail .reverse $ pathToThirdPendant),
                           Path Overworld pathToMasterSword]
-        return (totalCost', totalPath')
+        return (totalCost', map (\(Path _ xs) -> (map rearrangePosition xs)) totalPath')
 
   --boot [overworldMap, dungeon1Map, dungeon2Map, dungeon3Map]
-  let (totalCost', totalPath') = fromJust $ totalCostAndPath
+  let (totalCost', totalPath') = fromJust totalCostAndPath
+
   putStrLn $ "Custo para chegar à primeira dungeon: " ++ (show $ totalCost' !! 0)
+  putChar '\n'
   putStrLn $ "Caminho à primeira dungeon:" ++ (show $ totalPath' !! 0)
+  putChar '\n'
   putStrLn $ "Custo para chegar ao primeiro pingente: " ++ (show $ totalCost' !! 1)
-  putStrLn $ "Caminho ao primeiro pingente:" ++ (show $ totalPath' !! 1)
+  putChar '\n'
+  putStrLn $ "Caminho ao primeiro pingente e volta:" ++ (show $ totalPath' !! 1)
+  putChar '\n'
   putStrLn $ "Custo para chegar à segunda dungeon: " ++ (show $ totalCost' !! 2)
+  putChar '\n'
   putStrLn $ "Caminho à segunda dungeon:" ++ (show $ totalPath' !! 2)
-  putStrLn $ "Custo para chegar ao segundo pingente: " ++ (show $ totalCost' !! 3)
+  putChar '\n'
+  putStrLn $ "Custo para chegar ao segundo pingente e volta: " ++ (show $ totalCost' !! 3)
+  putChar '\n'
   putStrLn $ "Caminho ao segundo pingente:" ++ (show $ totalPath' !! 3)
+  putChar '\n'
   putStrLn $ "Custo para chegar à terceira dungeon: " ++ (show $ totalCost' !! 4)
+  putChar '\n'
   putStrLn $ "Caminho à terceira dungeon:" ++ (show $ totalPath' !! 4)
-  putStrLn $ "Custo para chegar ao terceiro pingente: " ++ (show $ totalCost' !! 5)
+  putChar '\n'
+  putStrLn $ "Custo para chegar ao terceiro pingente e volta: " ++ (show $ totalCost' !! 5)
+  putChar '\n'
   putStrLn $ "Caminho ao terceiro pingente:" ++ (show $ totalPath' !! 5)
-  putStrLn $ "Custo para chegar à MasterSword" ++ (show $ totalCost' !! 6)
+  putChar '\n'
+  putStrLn $ "Custo para chegar à MasterSword: " ++ (show $ totalCost' !! 6)
+  putChar '\n'
   putStrLn $ "Caminho à MasterSword :" ++ (show $ totalPath' !! 6)
+  putChar '\n'
+  putStrLn $ "Custo total: " ++ (show . sum $ totalCost')
+  putChar '\n'
